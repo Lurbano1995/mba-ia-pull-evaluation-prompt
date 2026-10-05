@@ -352,3 +352,66 @@ Rode uma vez e guarde o endereço: ao compartilhar de novo, o link muda.
 - Não altere os datasets de avaliação - apenas os prompts em prompts/bug_to_user_story_v2.yml
 - Itere, itere, itere - é normal precisar de 3-5 iterações para atingir 0.8 em todas as métricas
 - Documente seu processo - a jornada de otimização é tão importante quanto o resultado final
+
+## Técnicas Aplicadas (Fase 2)
+
+A versão v2 foi construída para aumentar a consistência, a testabilidade e a fidelidade ao relato do bug.
+
+### Role Prompting
+
+O modelo recebe o papel de Product Manager sênior com experiência em Agile, discovery, QA e engenharia de software. Isso orienta a resposta para uma User Story centrada no usuário, sem transformar o relato em uma lista de tarefas técnicas.
+
+### Few-shot Learning
+
+O System Prompt contém dois exemplos completos de entrada e saída. Os exemplos mostram a estrutura esperada, critérios de aceitação e tratamento de edge cases, mas incluem uma regra explícita para não copiar fatos dos exemplos para novos bugs.
+
+### Skeleton of Thought
+
+O prompt define uma sequência interna de análise: identificar persona/objetivo/valor, extrair sintomas e comportamento esperado, separar requisitos e restrições, converter comportamentos em critérios testáveis e revisar a resposta contra o relato. O raciocínio interno não é exposto na resposta final.
+
+### Regras de fidelidade e edge cases
+
+A v2 reforça a não alucinação: fatos, números, mensagens, endpoints e restrições presentes no relato devem ser preservados; causas, tecnologias e regras de negócio não devem ser inventadas. A saída possui seções específicas para critérios de aceitação, edge cases e notas técnicas.
+
+## Implementação
+
+Foram implementados os arquivos exigidos pelo desafio:
+
+- `prompts/bug_to_user_story_v2.yml` — prompt otimizado com metadados e técnicas aplicadas.
+- `src/pull_prompts.py` — pull do prompt público semente e normalização para YAML local.
+- `src/push_prompts.py` — validação e publicação pública da v2 no LangSmith Prompt Hub.
+- `tests/test_prompts.py` — os 6 testes de validação exigidos pelo desafio.
+
+### Como Executar
+
+```bash
+python -m venv venv
+# Windows: venv\Scripts\activate
+# Linux/macOS: source venv/bin/activate
+pip install -r requirements.txt
+```
+
+Configure `.env` a partir de `.env.example`, incluindo `LANGSMITH_API_KEY` e `USERNAME_LANGSMITH_HUB`.
+
+```bash
+python src/pull_prompts.py
+python src/push_prompts.py
+pytest tests/test_prompts.py -v
+python src/evaluate.py
+```
+
+A avaliação final depende das credenciais e da execução no LangSmith. Este repositório não registra notas de avaliação que não tenham sido efetivamente executadas.
+
+## Resultados Finais
+
+- Estrutura exigida: implementada.
+- Prompt v2: implementado.
+- Pull/push: implementados.
+- 6 testes: implementados.
+- Avaliação LangSmith: requer execução com credenciais configuradas.
+
+### Evidências no LangSmith
+
+Após executar `python src/evaluate.py`, registre aqui o link público do dataset/experimento e as evidências das métricas. O critério de aprovação é **Helpfulness >= 0.8, Correctness >= 0.8, F1-Score >= 0.8, Clarity >= 0.8 e Precision >= 0.8**.
+
+> Não foram inventados resultados ou links de experimentos. As métricas só devem ser declaradas após uma execução real no LangSmith.
